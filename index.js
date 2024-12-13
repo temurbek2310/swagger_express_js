@@ -4,6 +4,7 @@ const swaggerSpec = require('./swagger/swagger-config');
 const productRoutes = require("./routes/productRoutes");
 const authRoutes = require("./routes/authRoutes");
 const cors = require('cors');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -13,9 +14,9 @@ app.use(express.urlencoded({ extended: true })); // URL encoded body uchun
 
 // CORS konfiguratsiyasi
 const corsOptions = {
-    origin: "http://localhost:8080", // Bu yerga front-end yoki Swagger URL kiritiladi
+    origin: ["http://localhost:8080", "http://localhost:3000"], // Swagger UI va server domenini qo'shing
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    allowedHeaders: ["Content-Type", "Authorization"], // Qo'shimcha header'larni qo'shing
+    allowedHeaders: ["Content-Type", "Authorization"],
 };
 app.use(cors(corsOptions));
 
@@ -25,6 +26,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Routes
 app.use("/products", productRoutes); // Product routes
 app.use("/auth", authRoutes);        // Auth routes
+app.use('/users', userRoutes); // CRUD operatsiyalar uchun
 
 // Serverni tinglash
 const PORT = process.env.PORT || 3000;

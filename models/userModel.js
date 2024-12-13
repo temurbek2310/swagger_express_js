@@ -1,18 +1,36 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 
 const users = [
-    { id: 1, username: "admin", password: "1234" }, // Avvaldan qo'shilgan foydalanuvchi
-    { id: 2, username: "user1", password: "password" }
+    { id: 1, username: "admin", password: "hashed_password" }, // Misol uchun foydalanuvchi
 ];
-
 
 const addUser = async (username, password) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = { id: users.length + 1, username, password: hashedPassword };
     users.push(user);
     return user;
-}
+};
 
-const findUser = (username) => users.find(user => user.username === username);
+const findUserById = (id) => users.find(user => user.id === id);
 
-module.exports = { addUser, findUser, users };
+const updateUser = (id, newData) => {
+    const user = findUserById(id);
+    if (user) {
+        Object.assign(user, newData);
+        return user;
+    }
+    return null;
+};
+
+const deleteUser = (id) => {
+    const index = users.findIndex(user => user.id === id);
+    if (index !== -1) {
+        return users.splice(index, 1);
+    }
+    return null;
+};
+
+const findUser = (username) =>
+    users.find(user => user.username.toLowerCase() === username.toLowerCase());
+
+module.exports = { addUser, findUserById, updateUser, deleteUser, findUser, users };
