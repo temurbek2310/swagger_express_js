@@ -11,9 +11,9 @@ const helmet = require('helmet');
 const app = express();
 
 // Ma'lumotlar bazasini sinxronlashtirish
-sequelize.sync({ force: true })
-    .then(() => console.log('Database & tables created!'))
-    .catch(err => console.error('Database sync failed:', err));
+sequelize.authenticate()
+    .then(() => console.log('Database connected!'))
+    .catch(err => console.error('Unable to connect to the database:', err));
 
 // Middleware
 app.use(express.json());
