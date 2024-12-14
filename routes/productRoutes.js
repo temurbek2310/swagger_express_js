@@ -1,95 +1,19 @@
 const express = require("express");
 const router = express.Router();
-const productModel = require("../models/product");
+const { 
+    addProduct, 
+    getAllProducts, 
+    updateProduct, 
+    deleteProduct 
+} = require('../controllers/productController');
 const { authenticateToken } = require("../middleware/authMiddleware");
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Product:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *           description: Unique identifier for the product
- *         name:
- *           type: string
- *           description: Name of the product
- *         price:
- *           type: number
- *           description: Price of the product
- *   securitySchemes:
- *     BearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- */
-
-/**
- * @swagger
- * /products:
- *   get:
- *     tags: [Products]
- *     summary: Get all products
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: List of all products
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Product'
- *       401:
- *         description: Unauthorized
- */
-// Get all products
-router.get('/', authenticateToken, (req, res) => {
-    res.status(200).json(productModel.products.length ? productModel.products : { message: 'Products is empty' });
-});
-
-/**
- * @swagger
- * /products/{id}:
- *   get:
- *     tags: [Products]
- *     summary: Get product by ID
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Product found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Product'
- *       404:
- *         description: Product not found
- *       401:
- *         description: Unauthorized
- */
-// Get product by ID
-router.get('/:id', authenticateToken, (req, res) => {
-    const product = productModel.getProductById(req.params.id);
-    if (!product) return res.status(404).send('Product not found');
-    res.json(product);
-});
 
 /**
  * @swagger
  * /products:
  *   post:
+ *     summary: Yangi mahsulot qo'shish
  *     tags: [Products]
- *     summary: Create a new product
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -97,38 +21,51 @@ router.get('/:id', authenticateToken, (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Telefon"
+ *               price:
+ *                 type: number
+ *                 example: 500
+ *               description:
+ *                 type: string
+ *                 example: "Yangi smartfon modeli"
  *     responses:
  *       201:
- *         description: Product created
- *       400:
- *         description: Bad request
+ *         description: Mahsulot muvaffaqiyatli qo'shildi
  *       401:
- *         description: Unauthorized
+ *         description: Token noto‘g‘ri yoki yo‘q
+ *       403:
+ *         description: Token yaroqsiz
  */
-// Create a new product
-router.post('/', authenticateToken, (req, res) => {
-    const { name, price } = req.body;
+router.post('/', authenticateToken, addProduct);
 
-    if (!name || !price) {
-        return res.status(400).json({ error: 'Name and price are required' });
-    }
-
-    const newProduct = productModel.addProduct({
-        id: Date.now(), // Unique ID
-        name,
-        price
-    });
-
-    res.status(201).json(newProduct);
-});
+/**
+ * @swagger
+ * /products:
+ *   get:
+ *     summary: Barcha mahsulotlarni olish
+ *     tags: [Products]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Mahsulotlar muvaffaqiyatli olindi
+ *       401:
+ *         description: Token noto‘g‘ri yoki yo‘q
+ *       403:
+ *         description: Token yaroqsiz
+ */
+router.get('/', authenticateToken, getAllProducts);
 
 /**
  * @swagger
  * /products/{id}:
  *   put:
+ *     summary: ID bo'yicha mahsulotni yangilash
  *     tags: [Products]
- *     summary: Update a product
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -137,33 +74,37 @@ router.post('/', authenticateToken, (req, res) => {
  *         required: true
  *         schema:
  *           type: integer
+ *         description: Yangilash uchun mahsulot ID-si
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Laptop"
+ *               price:
+ *                 type: number
+ *                 example: 1000
+ *               description:
+ *                 type: string
+ *                 example: "Yangi model laptop"
  *     responses:
  *       200:
- *         description: Product updated
+ *         description: Mahsulot muvaffaqiyatli yangilandi
  *       404:
- *         description: Product not found
- *       401:
- *         description: Unauthorized
+ *         description: Mahsulot topilmadi
  */
-// Update product
-router.put('/:id', authenticateToken, (req, res) => {
-    const updatedProduct = productModel.updateProduct(req.params.id, req.body);
-    if (!updatedProduct) return res.status(404).send('Product not found');
-    res.json(updatedProduct);
-});
+router.put('/:id', authenticateToken, updateProduct);
 
 /**
  * @swagger
  * /products/{id}:
  *   delete:
+ *     summary: ID bo'yicha mahsulotni o'chirish
  *     tags: [Products]
- *     summary: Delete a product
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -172,19 +113,13 @@ router.put('/:id', authenticateToken, (req, res) => {
  *         required: true
  *         schema:
  *           type: integer
+ *         description: O'chiriladigan mahsulot ID-si
  *     responses:
  *       204:
- *         description: Product deleted
+ *         description: Mahsulot muvaffaqiyatli o'chirildi
  *       404:
- *         description: Product not found
- *       401:
- *         description: Unauthorized
+ *         description: Mahsulot topilmadi
  */
-// Delete product
-router.delete('/:id', authenticateToken, (req, res) => {
-    const isDeleted = productModel.deleteProduct(req.params.id);
-    if (!isDeleted) return res.status(404).json({ message: `Product with id ${req.params.id} not found` });
-    res.status(204).send();
-});
+router.delete('/:id', authenticateToken, deleteProduct);
 
 module.exports = router;

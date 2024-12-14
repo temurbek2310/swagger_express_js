@@ -1,22 +1,18 @@
-const products = [];
+const { DataTypes } = require("sequelize");
+const sequelize = require("../database/database");
 
-module.exports = {
-    getAllProducts: () => products,
-    getProductById: (id) => products.find(p => p.id === id),
-    addProduct: (product) => {
-        products.push(product);
-        return product;
+const Product = sequelize.define('Product', {
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
-    updateProduct: (id, updatedProduct) => {
-        const index = products.findIndex(p => p.id === id);
-        if (index === -1) return null;
-        products[index] = { ...products[index], ...updatedProduct };
-        return products[index];
+    price: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     },
-    deleteProduct: (id) => {
-        const index = products.findIndex(p => p.id === id);
-        if (index === -1) return false;
-        products.splice(index, 1);
-        return true;
-    },
-};
+    description:{
+        type: DataTypes.STRING
+    }
+})
+
+module.exports = Product

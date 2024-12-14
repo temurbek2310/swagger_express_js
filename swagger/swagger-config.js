@@ -14,18 +14,18 @@ const swaggerOptions = {
             },
         },
         components: {
-            securitySchemas: {
+            securitySchemes: {  // To'g'rilangan joy
                 BearerAuth: {
                     type: 'http',
                     scheme: 'bearer',
                     bearerFormat: 'JWT',
-                }
-            }
+                },
+            },
         },
         security: [
             {
-                BearerAuth: [],
-            }
+                BearerAuth: [], // Avtorizatsiya talab qilinadi
+            },
         ],
         servers: [
             {
