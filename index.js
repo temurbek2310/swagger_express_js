@@ -6,6 +6,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require('./routes/userRoutes');
 const sequelize = require('./database/database');
 const cors = require('cors');
+const helmet = require('helmet');
 
 const app = express();
 
@@ -17,6 +18,7 @@ sequelize.sync({ force: true })
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(helmet());
 
 // CORS konfiguratsiyasi
 const corsOptions = {
